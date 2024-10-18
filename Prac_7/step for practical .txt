@@ -1,0 +1,304 @@
+
+Here’s a step-by-step guide to create an Android application using Java and Gradle that integrates Google Maps, adds a marker for the current location, and displays latitude and longitude.
+
+Step 1: Set Up Your Development Environment
+Install Android Studio: Ensure you have the latest version of Android Studio.
+
+Create a New Project:
+
+Open Android Studio.
+Select "New Project".
+Choose "Empty Activity" and click "Next".
+Name your project (e.g., MapApp), set the language to Java, and select a minimum API level (API 21 or higher).
+Click "Finish".
+Step 2: Add Google Maps Dependencies
+Open the build.gradle (Module: app) file and add the following dependencies:
+
+groovy
+Copy code
+dependencies {
+    implementation 'com.google.android.gms:play-services-maps:18.1.0'
+    implementation 'com.google.android.gms:play-services-location:19.0.1'
+}
+
+
+Sync your project by clicking "Sync Now" in the notification bar.
+
+Step 3: Obtain a Google Maps API Key
+Go to the Google Cloud Console.
+Create a new project or select an existing one.
+Navigate to "APIs & Services" > "Credentials".
+Click on "Create credentials" and choose "API key".
+Enable the "Maps SDK for Android" from the "Library" section.
+Restrict the API key to your app’s SHA-1 fingerprint and package name.
+Step 4: Add Permissions and API Key
+Open AndroidManifest.xml and add the following permissions inside the <manifest> tag:
+
+xml
+Copy code
+<uses-permission android:name="android.permission.INTERNET"/>
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+Also in the AndroidManifest.xml, add the API key inside the <application> tag:
+
+xml
+Copy code
+<meta-data
+    android:name="com.google.android.geo.API_KEY"
+    android:value="YOUR_API_KEY_HERE"/>
+Replace YOUR_API_KEY_HERE with your actual API key.
+
+Step 5: Create the Map Activity Layout
+Open res/layout/activity_main.xml and replace its content with the following to include a MapFragment:
+
+xml
+Copy code
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</RelativeLayout>
+Step 6: Implement the Map Functionality
+Open MainActivity.java and implement the map functionality:
+
+java
+Copy code
+package com.example.prac_7;
+
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.os.Bundle;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.FragmentActivity;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+public class MainActivity extends FragmentActivity implements OnMapReadyCallback {
+
+    private GoogleMap mMap;
+    private FusedLocationProviderClient fusedLocationClient;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+
+        // Check location permission
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        } else {
+            mMap.setMyLocationEnabled(true);
+            displayCurrentLocation();
+        }
+
+        // Add a click listener to add a marker on the map when clicked
+        mMap.setOnMapClickListener(latLng -> {
+            mMap.addMarker(new MarkerOptions().position(latLng).title("New Marker"));
+        });
+    }
+
+    private void displayCurrentLocation() {
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, location -> {
+                    if (location != null) {
+                        LatLng currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                        mMap.addMarker(new MarkerOptions().position(currentLocation).title("Current Location"));
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15));
+                    }
+                });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 1) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    mMap.setMyLocationEnabled(true);
+                    displayCurrentLocation();
+                }
+            }
+        }
+    }
+}
+
+
+
+
+Step 7: Run Your Application
+Connect an Android device or use an emulator with Google Play services.
+Click on the "Run" button in Android Studio.
+If prompted, allow the app to access location services.
+Summary
+You’ve now created an Android application using Java that:
+
+Integrates Google Maps.
+Displays the user’s current location with a marker.
+Shows latitude and longitude using a Toast message.
+Feel free to enhance the app further by adding more features or customizing the UI. If you encounter any issues, check the Logcat for errors and ensure that permissions are correctly configured.
+
+
+********************** Restrict the API key to your app’s SHA-1 fingerprint and package name. 
+*********************** From where do i get these api and sha-1 fingerprint ***********
+
+To restrict your Google Maps API key to your app's SHA-1 fingerprint and package name, you need to obtain both the SHA-1 fingerprint and your app's package name. Here’s how to do that:
+
+Step 1: Get Your Package Name
+Open AndroidManifest.xml:
+Look for the package attribute in the <manifest> tag. It will look something like com.example.prac_7. This is your package name.
+Step 2: Get Your SHA-1 Fingerprint
+You can obtain the SHA-1 fingerprint using Android Studio or the command line.
+
+Method 1: Using Android Studio
+Open Android Studio.
+
+Go to View > Tool Windows > Gradle.
+
+Expand your project, then expand Tasks > android.
+
+Double-click on signingReport.
+
+Look for the section that shows the SHA-1 fingerprint. It will look like this:
+
+makefile
+Copy code
+Variant: debug
+Config: debug
+Store: /path/to/your/debug.keystore
+Alias: androiddebugkey
+MD5: ...
+SHA1: YOUR_SHA1_FINGERPRINT
+SHA-256: ...
+Method 2: Using Command Line
+Open your terminal (Command Prompt or Terminal).
+
+Navigate to the directory where the debug.keystore is located (usually in ~/.android for Linux/Mac or C:\Users\YourUser\.android for Windows).
+
+Run the following command:
+
+bash
+Copy code
+keytool -list -v -keystore debug.keystore -alias androiddebugkey -storepass android -keypass android
+This command will output various details including the SHA-1 fingerprint.
+
+Step 3: Restrict API Key
+Go back to the Google Cloud Console.
+Navigate to APIs & Services > Credentials.
+Find your API key and click on it.
+In the "Application restrictions" section, select Android apps.
+Click on Add package name and fingerprint.
+Enter your package name and the SHA-1 fingerprint you obtained.
+Example
+Package Name: com.example.prac_7
+SHA-1 Fingerprint: AB:CD:EF:... (replace with your actual SHA-1)
+
+
+****************** 'keytool' is not recognized as an internal or external command, operable program or batch file. *****************
+
+The error message indicates that the keytool command is not recognized, which typically means that the Java Development Kit (JDK) is not installed or the keytool is not in your system's PATH. Here’s how to resolve this issue:
+
+Step 1: Check JDK Installation
+Ensure JDK is Installed:
+
+Open Command Prompt and type:
+bash
+Copy code
+java -version
+If you see a version number, the JDK is installed. If not, you'll need to install it.
+Download and Install JDK:
+
+Download the JDK from the Oracle website or use OpenJDK.
+Follow the installation instructions for your system.
+Step 2: Add JDK to System PATH
+If the JDK is installed but keytool is still not recognized, you may need to add the JDK’s bin directory to your system PATH:
+
+Find JDK Installation Path:
+
+Usually, it’s installed in C:\Program Files\Java\jdkX.X.X\bin (replace X.X.X with your version).
+Add to PATH:
+
+Right-click on This PC or My Computer and select Properties.
+Click on Advanced system settings.
+In the System Properties window, click on the Environment Variables button.
+In the System variables section, find and select the Path variable, then click Edit.
+Click New and add the path to your JDK bin folder (e.g., C:\Program Files\Java\jdkX.X.X\bin).
+Click OK to close all dialog boxes.
+Step 3: Open a New Command Prompt
+After updating the PATH, open a new Command Prompt window to ensure it recognizes the changes.
+
+Run the keytool command again:
+
+bash
+Copy code
+keytool -list -v -keystore %USERPROFILE%\.android\debug.keystore -alias androiddebugkey -storepass android -keypass android
+Step 4: Obtain the SHA-1 Fingerprint
+After running the command successfully, you should see the SHA-1 fingerprint in the output
+
+
+
+************************* editing manifest . xml file ****************************
+Key Points to Note:
+Order of Elements: The <uses-permission> tags should typically be placed directly inside the <manifest> tag but outside of the <application> tag. This makes it clear that they apply to the entire application.
+
+API Key: Ensure that the API key in the <meta-data> tag is correct and properly restricted in the Google Cloud Console to your app’s package name and SHA-1 fingerprint.
+
+Backup Settings: You have entries for android:dataExtractionRules and android:fullBackupContent. If you're not using those features, you can remove those attributes to simplify the manifest.
+
+
+******************** how to check the given api package and name and sha -1 fingerprint in google cloud cpnsole *********************
+Step 1: Access Google Cloud Console
+Go to the Google Cloud Console: Google Cloud Console.
+Sign in with the Google account that has access to the project.
+Step 2: Select Your Project
+In the top-left corner, click on the project dropdown.
+Select the project that contains your API key.
+Step 3: Navigate to API & Services
+In the left sidebar, click on APIs & Services.
+Click on Credentials.
+Step 4: Find Your API Key
+In the Credentials section, you’ll see a list of your credentials.
+Look for the API key you’re using for Google Maps. Click on the API key name to edit it.
+Step 5: Restrict Your API Key
+In the API key details page, look for the Application restrictions section.
+
+Select Android apps.
+
+Click on Add package name and fingerprint.
+
+Step 6: Enter Package Name and SHA-1 Fingerprint
+Package Name: Enter your app's package name, which you found in AndroidManifest.xml (e.g., com.example.prac_7).
+SHA-1 Fingerprint: Enter the SHA-1 fingerprint that you obtained earlier.
+Example
+Package Name: com.example.prac_7
+SHA-1 Fingerprint: AB:CD:EF:... (replace with your actual SHA-1)
+Step 7: Save Changes
+After entering the package name and SHA-1 fingerprint, click Save at the bottom of the page.
+Step 8: Verify Restrictions
+To ensure that the restrictions are applied correctly, you can go back to the Credentials page and view the details of the API key. The restrictions should now show your package name and SHA-1 fingerprint.
+
+
+
