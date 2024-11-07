@@ -1,43 +1,48 @@
 
-Here’s a step-by-step guide to create an Android application using Java and Gradle that integrates Google Maps, adds a marker for the current location, and displays latitude and longitude.
 
 Step 1: Set Up Your Development Environment
-Install Android Studio: Ensure you have the latest version of Android Studio.
 
 Create a New Project:
-
 Open Android Studio.
 Select "New Project".
-Choose "Empty Activity" and click "Next".
+Choose "Empty views Activity" and click "Next".
+
 Name your project (e.g., MapApp), set the language to Java, and select a minimum API level (API 21 or higher).
 Click "Finish".
+
+
 Step 2: Add Google Maps Dependencies
 Open the build.gradle (Module: app) file and add the following dependencies:
-
+******************************
 groovy
 Copy code
 dependencies {
     implementation 'com.google.android.gms:play-services-maps:18.1.0'
     implementation 'com.google.android.gms:play-services-location:19.0.1'
 }
-
+**********************************************
 
 Sync your project by clicking "Sync Now" in the notification bar.
-
+**********************************************8
 Step 3: Obtain a Google Maps API Key
 Go to the Google Cloud Console.
 Create a new project or select an existing one.
 Navigate to "APIs & Services" > "Credentials".
 Click on "Create credentials" and choose "API key".
 Enable the "Maps SDK for Android" from the "Library" section.
+credential pe jaake key jo create hui waha 3 dot pe click krna h 
+api restriction m jaake restrict key
+
 Restrict the API key to your app’s SHA-1 fingerprint and package name.
 Step 4: Add Permissions and API Key
-Open AndroidManifest.xml and add the following permissions inside the <manifest> tag:
+************************************************88
 
+Open AndroidManifest.xml and add the following permissions inside the <manifest> tag:
 xml
 Copy code
 <uses-permission android:name="android.permission.INTERNET"/>
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+******************************************************************
 Also in the AndroidManifest.xml, add the API key inside the <application> tag:
 
 xml
@@ -47,6 +52,8 @@ Copy code
     android:value="YOUR_API_KEY_HERE"/>
 Replace YOUR_API_KEY_HERE with your actual API key.
 
+add this code to chatgpt to change indentation
+*****************************************************************************
 Step 5: Create the Map Activity Layout
 Open res/layout/activity_main.xml and replace its content with the following to include a MapFragment:
 
